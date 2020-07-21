@@ -32,7 +32,7 @@ func testData() (testStruct, []byte) {
 			0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			2, 'x', 'y',
-			3, 'a', 'b', 'c',
+			3, 0, 'a', 'b', 'c',
 		}
 }
 
@@ -107,7 +107,7 @@ func (t testStruct) Append(c *Cursor) (err error) {
 		return err
 	}
 
-	err = c.WriteString(t.string, 8)
+	err = c.WriteString(t.string, 16)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func (t *testStruct) Read(c *Cursor) (err error) {
 		return err
 	}
 
-	t.string, err = c.ReadString(8)
+	t.string, err = c.ReadString(16)
 	if err != nil {
 		return err
 	}
@@ -193,6 +193,7 @@ func TestCursor(t *testing.T) {
 
 	t.Run("unmarshal", func(t *testing.T) {
 		cur := NewCursor(data)
+		require.Equal(t, len(data), cur.Len())
 
 		s2 := testStruct{}
 		err := s2.Read(cur)
@@ -223,5 +224,55 @@ func TestInvalidBits(t *testing.T) {
 	t.Run("write", func(t *testing.T) {
 		err := NewCursor(nil).WriteString("", 7)
 		require.Error(t, err)
+	})
+}
+
+func TestShould(t *testing.T) {
+	t.Run("enough", func(t *testing.T) {
+		cursor := NewCursor(make([]byte, 10))
+		err := cursor.should(10)
+		require.NoError(t, err)
+	})
+
+	t.Run("not-enough", func(t *testing.T) {
+		cursor := NewCursor(nil)
+		err := cursor.should(10)
+		require.Error(t, err)
+	})
+}
+
+func TestCursor_Sub(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
+		data := []byte{0, 1, 2, 3, 4, 5, 6}
+
+		cur := NewCursor(data)
+		cur2, ok := cur.Sub(1, 4)
+		require.True(t, ok)
+		require.Equal(t, []byte{1, 2, 3}, cur2.Buffer())
+	})
+
+	t.Run("ok", func(t *testing.T) {
+		data := []byte{0}
+
+		cur := NewCursor(data)
+		cur2, ok := cur.Sub(0, 1)
+		require.True(t, ok)
+		require.Equal(t, []byte{0}, cur2.Buffer())
+	})
+
+	t.Run("not-ok", func(t *testing.T) {
+		data := []byte{0}
+
+		cur := NewCursor(data)
+		_, ok := cur.Sub(1, 4)
+		require.False(t, ok)
+	})
+
+	t.Run("not-ok", func(t *testing.T) {
+		data := []byte{0, 1, 2}
+
+		cur := NewCursor(data)
+		_, ok := cur.Sub(1, 4)
+		require.False(t, ok)
 	})
 }
