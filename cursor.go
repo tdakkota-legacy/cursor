@@ -30,8 +30,23 @@ func (c *Cursor) Move(index int) {
 	c.cursor = index
 }
 
+func (c *Cursor) Len() int {
+	return len(c.buf)
+}
+
 func (c *Cursor) Buffer() []byte {
 	return c.buf
+}
+
+func (c *Cursor) checkRange(i int) bool {
+	return i >= 0 && i < len(c.buf)
+}
+
+func (c *Cursor) Sub(from, to int) (*Cursor, bool) {
+	if from <= to && c.checkRange(from) && c.checkRange(to-1) {
+		return NewCursor(c.buf[from:to]), true
+	}
+	return nil, false
 }
 
 func (c *Cursor) need(length int) {
