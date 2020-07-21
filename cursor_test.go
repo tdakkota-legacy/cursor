@@ -213,3 +213,15 @@ func TestCursor(t *testing.T) {
 		require.Equal(t, s, s2)
 	})
 }
+
+func TestInvalidBits(t *testing.T) {
+	t.Run("read", func(t *testing.T) {
+		_, err := NewCursor(make([]byte, 10)).ReadString(7)
+		require.Error(t, err)
+	})
+
+	t.Run("write", func(t *testing.T) {
+		err := NewCursor(nil).WriteString("", 7)
+		require.Error(t, err)
+	})
+}
