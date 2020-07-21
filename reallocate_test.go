@@ -7,7 +7,7 @@ import (
 
 func TestAppendSize(t *testing.T) {
 	t.Run("allocate", func(t *testing.T) {
-		s := make([]byte, 10, 10)
+		s := make([]byte, 10)
 		newS := AppendSize(s, 10)
 		require.GreaterOrEqual(t, cap(newS), 20)
 	})

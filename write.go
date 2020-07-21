@@ -63,29 +63,26 @@ func (c *Cursor) WriteBytes(s []byte, bits int64) (err error) {
 	switch bits {
 	case 8:
 		if length > math.MaxUint8 {
-			err = ErrStringTooLong
+			return ErrStringTooLong
 		}
 
 		err = c.WriteByte(byte(length))
 	case 16:
 		if length > math.MaxUint16 {
-			err = ErrStringTooLong
+			return ErrStringTooLong
 		}
 
 		err = c.WriteUint16(uint16(length))
 	case 32:
 		if length > math.MaxUint32 {
-			err = ErrStringTooLong
+			return ErrStringTooLong
 		}
 
 		err = c.WriteUint32(uint32(length))
 	case 64:
-		if uint64(length) > math.MaxUint64 {
-			err = ErrStringTooLong
-		}
 		err = c.WriteUint64(uint64(length))
 	default:
-		err = ErrInvalidBits
+		return ErrInvalidBits
 	}
 
 	if err != nil {
