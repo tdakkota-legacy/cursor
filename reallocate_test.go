@@ -1,8 +1,9 @@
 package cursor
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestAppendSize(t *testing.T) {

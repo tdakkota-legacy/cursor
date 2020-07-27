@@ -2,8 +2,9 @@ package cursor
 
 import (
 	"encoding/binary"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func testData() (testStruct, []byte) {
