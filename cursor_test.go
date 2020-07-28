@@ -277,3 +277,18 @@ func TestCursor_Sub(t *testing.T) {
 		require.False(t, ok)
 	})
 }
+
+func TestCursor_WriteCursor(t *testing.T) {
+	cursor := NewCursor(nil)
+	err := cursor.WriteByte('b')
+	require.NoError(t, err)
+
+	cursor2 := NewCursor(nil)
+	err = cursor2.WriteByte('a')
+	require.NoError(t, err)
+
+	err = cursor2.WriteCursor(cursor)
+	require.NoError(t, err)
+
+	require.Equal(t, []byte{'a', 'b'}, cursor2.Buffer())
+}

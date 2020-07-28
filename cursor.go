@@ -30,6 +30,10 @@ func (c *Cursor) Move(index int) {
 	c.cursor = index
 }
 
+func (c *Cursor) Index() int {
+	return c.cursor
+}
+
 func (c *Cursor) Len() int {
 	return len(c.buf)
 }

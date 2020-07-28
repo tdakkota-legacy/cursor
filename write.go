@@ -97,3 +97,14 @@ func (c *Cursor) WriteBytes(s []byte, bits int64) (err error) {
 func (c *Cursor) WriteString(s string, bits int64) (err error) {
 	return c.WriteBytes(s2b(s), bits)
 }
+
+func (c *Cursor) Append(b []byte) (err error) {
+	c.need(len(b))
+	c.cursor += copy(c.buf[c.cursor:], b)
+	return nil
+}
+
+
+func (c *Cursor) WriteCursor(cur *Cursor) (err error) {
+	return c.Append(cur.Buffer())
+}
