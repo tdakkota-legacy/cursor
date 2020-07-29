@@ -21,10 +21,12 @@ cur.WriteString("abc", 8) // reallocate buffer, write 1 byte for length and 3 fo
 ### Available methods
 Write:
 ```go
+func (c *Cursor) WriteUint(b uint) error
 func (c *Cursor) WriteByte(b byte) error
 func (c *Cursor) WriteUint16(b uint16) error
 func (c *Cursor) WriteUint32(b uint32) error
 func (c *Cursor) WriteUint64(b uint64) error
+func (c *Cursor) WriteInt(b int) error
 func (c *Cursor) WriteInt8(b int8) error
 func (c *Cursor) WriteInt16(b int16) error
 func (c *Cursor) WriteInt32(b int32) error
@@ -38,10 +40,12 @@ func (c *Cursor) WriteString(s string, bits int64) (err error)
 
 Read:
 ```go
+func (c *Cursor) ReadUint() (b uint, err error)
 func (c *Cursor) ReadByte() (b byte, err error)
 func (c *Cursor) ReadUint16() (b uint16, err error)
 func (c *Cursor) ReadUint32() (b uint32, err error)
 func (c *Cursor) ReadUint64() (b uint64, err error)
+func (c *Cursor) ReadInt() (b int, err error)
 func (c *Cursor) ReadInt8() (b int8, err error)
 func (c *Cursor) ReadInt16() (b int16, err error)
 func (c *Cursor) ReadInt32() (b int32, err error)
