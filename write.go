@@ -1,8 +1,30 @@
 package cursor
 
-import "math"
+import (
+	"math"
+	"unsafe"
+)
+
+func (c *Cursor) WriteUint(b uint) error {
+	switch unsafe.Sizeof(uint(0)) {
+	case 1:
+		return c.WriteUint8(uint8(b))
+	case 2:
+		return c.WriteUint16(uint16(b))
+	case 4:
+		return c.WriteUint32(uint32(b))
+	case 8:
+		return c.WriteUint64(uint64(b))
+	}
+
+	return ErrUnknownIntSize
+}
 
 func (c *Cursor) WriteByte(b byte) error {
+	return c.WriteUint8(b)
+}
+
+func (c *Cursor) WriteUint8(b uint8) error {
 	c.need(1)
 
 	c.buf[c.cursor] = b
@@ -32,6 +54,21 @@ func (c *Cursor) WriteUint64(b uint64) error {
 	c.order.PutUint64(c.buf[c.cursor:], b)
 	c.cursor += 8
 	return nil
+}
+
+func (c *Cursor) WriteInt(b int) error {
+	switch unsafe.Sizeof(int(0)) {
+	case 1:
+		return c.WriteInt8(int8(b))
+	case 2:
+		return c.WriteInt16(int16(b))
+	case 4:
+		return c.WriteInt32(int32(b))
+	case 8:
+		return c.WriteInt64(int64(b))
+	}
+
+	return ErrUnknownIntSize
 }
 
 func (c *Cursor) WriteInt8(b int8) error {

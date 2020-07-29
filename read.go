@@ -1,8 +1,48 @@
 package cursor
 
-import "math"
+import (
+	"math"
+	"unsafe"
+)
+
+func (c *Cursor) ReadUint() (b uint, err error) {
+	switch unsafe.Sizeof(uint(0)) {
+	case 1:
+		n, err := c.ReadUint8()
+		if err != nil {
+			return 0, err
+		}
+		b = uint(n)
+	case 2:
+		n, err := c.ReadUint16()
+		if err != nil {
+			return 0, err
+		}
+		b = uint(n)
+	case 4:
+		n, err := c.ReadUint32()
+		if err != nil {
+			return 0, err
+		}
+		b = uint(n)
+	case 8:
+		n, err := c.ReadUint64()
+		if err != nil {
+			return 0, err
+		}
+		b = uint(n)
+	default:
+		return 0, ErrUnknownIntSize
+	}
+
+	return b, nil
+}
 
 func (c *Cursor) ReadByte() (b byte, err error) {
+	return c.ReadUint8()
+}
+
+func (c *Cursor) ReadUint8() (b uint8, err error) {
 	err = c.should(1)
 	if err != nil {
 		return
@@ -44,6 +84,39 @@ func (c *Cursor) ReadUint64() (b uint64, err error) {
 	b = c.order.Uint64(c.buf[c.cursor:])
 	c.cursor += 8
 	return
+}
+
+func (c *Cursor) ReadInt() (b int, err error) {
+	switch unsafe.Sizeof(int(0)) {
+	case 1:
+		n, err := c.ReadInt8()
+		if err != nil {
+			return 0, err
+		}
+		b = int(n)
+	case 2:
+		n, err := c.ReadInt16()
+		if err != nil {
+			return 0, err
+		}
+		b = int(n)
+	case 4:
+		n, err := c.ReadInt32()
+		if err != nil {
+			return 0, err
+		}
+		b = int(n)
+	case 8:
+		n, err := c.ReadInt64()
+		if err != nil {
+			return 0, err
+		}
+		b = int(n)
+	default:
+		return 0, ErrUnknownIntSize
+	}
+
+	return b, nil
 }
 
 func (c *Cursor) ReadInt8() (b int8, err error) {

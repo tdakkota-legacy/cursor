@@ -9,10 +9,12 @@ import (
 
 func testData() (testStruct, []byte) {
 	return testStruct{
+			10,
 			1,
 			2,
 			3,
 			4,
+			11,
 			5,
 			6,
 			7,
@@ -22,10 +24,12 @@ func testData() (testStruct, []byte) {
 			[]byte{'x', 'y'},
 			"abc",
 		}, []byte{
+			10, 0, 0, 0, 0, 0, 0, 0,
 			1,
 			2, 0,
 			3, 0, 0, 0,
 			4, 0, 0, 0, 0, 0, 0, 0,
+			11, 0, 0, 0, 0, 0, 0, 0,
 			5,
 			6, 0,
 			7, 0, 0, 0,
@@ -38,10 +42,12 @@ func testData() (testStruct, []byte) {
 }
 
 type testStruct struct {
+	uint
 	byte
 	uint16
 	uint32
 	uint64
+	int
 	int8
 	int16
 	int32
@@ -53,6 +59,11 @@ type testStruct struct {
 }
 
 func (t testStruct) Append(c *Cursor) (err error) {
+	err = c.WriteUint(t.uint)
+	if err != nil {
+		return err
+	}
+
 	err = c.WriteByte(t.byte)
 	if err != nil {
 		return err
@@ -69,6 +80,11 @@ func (t testStruct) Append(c *Cursor) (err error) {
 	}
 
 	err = c.WriteUint64(t.uint64)
+	if err != nil {
+		return err
+	}
+
+	err = c.WriteInt(t.int)
 	if err != nil {
 		return err
 	}
@@ -117,6 +133,11 @@ func (t testStruct) Append(c *Cursor) (err error) {
 }
 
 func (t *testStruct) Read(c *Cursor) (err error) {
+	t.uint, err = c.ReadUint()
+	if err != nil {
+		return err
+	}
+
 	t.byte, err = c.ReadByte()
 	if err != nil {
 		return err
@@ -133,6 +154,11 @@ func (t *testStruct) Read(c *Cursor) (err error) {
 	}
 
 	t.uint64, err = c.ReadUint64()
+	if err != nil {
+		return err
+	}
+
+	t.int, err = c.ReadInt()
 	if err != nil {
 		return err
 	}
