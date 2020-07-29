@@ -7,23 +7,34 @@ import (
 type Cursor struct {
 	cursor int
 	buf    []byte
-	order  binary.ByteOrder
+
+	defaultBitSize int
+	order          binary.ByteOrder
 }
 
 func NewCursor(buf []byte) *Cursor {
-	return &Cursor{buf: buf, order: binary.LittleEndian}
+	return &Cursor{buf: buf, order: binary.LittleEndian, defaultBitSize: 8}
 }
 
+// Sets default bit size of length word.
+func (c *Cursor) LengthBitSize(i int) {
+	c.defaultBitSize = i
+}
+
+// Sets byte order.
 func (c *Cursor) Order(order binary.ByteOrder) {
 	c.order = order
 }
 
-func (c *Cursor) PreAllocate(length int) {
+// Increase buffer size.
+func (c *Cursor) Grow(length int) {
 	c.buf = AppendSize(c.buf, length)
 }
 
+// Sets buffer size to zero, moves cursor to zero index
 func (c *Cursor) Reset() {
-	c.Move(0)
+	c.buf = c.buf[:0]
+	c.cursor = 0
 }
 
 func (c *Cursor) Move(index int) {
@@ -34,12 +45,22 @@ func (c *Cursor) Index() int {
 	return c.cursor
 }
 
+// Returns length of buffer.
 func (c *Cursor) Len() int {
 	return len(c.buf)
 }
 
+// Returns capacity of buffer.
+func (c *Cursor) Cap() int {
+	return cap(c.buf)
+}
+
 func (c *Cursor) Buffer() []byte {
 	return c.buf
+}
+
+func (c *Cursor) SetBuffer(buf []byte) {
+	c.buf = buf
 }
 
 func (c *Cursor) checkRange(i int) bool {
@@ -54,7 +75,7 @@ func (c *Cursor) Sub(from, to int) (*Cursor, bool) {
 }
 
 func (c *Cursor) need(length int) {
-	c.PreAllocate(length)
+	c.Grow(length)
 }
 
 func (c *Cursor) should(length int) error {

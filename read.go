@@ -100,7 +100,7 @@ func (c *Cursor) ReadFloat64() (b float64, err error) {
 	return math.Float64frombits(r), nil
 }
 
-func (c *Cursor) ReadBytes(bits int64) (s []byte, err error) {
+func (c *Cursor) ReadBytesBits(bits int64) (s []byte, err error) {
 	length := uint64(0)
 
 	switch bits {
@@ -141,11 +141,19 @@ func (c *Cursor) ReadBytes(bits int64) (s []byte, err error) {
 	return
 }
 
-func (c *Cursor) ReadString(bits int64) (s string, err error) {
-	b, err := c.ReadBytes(bits)
+func (c *Cursor) ReadStringBits(bits int64) (s string, err error) {
+	b, err := c.ReadBytesBits(bits)
 	if err != nil {
 		return "", err
 	}
 
 	return b2s(b), nil
+}
+
+func (c *Cursor) ReadBytes() (s []byte, err error) {
+	return c.ReadBytesBits(int64(c.defaultBitSize))
+}
+
+func (c *Cursor) ReadString() (s string, err error) {
+	return c.ReadStringBits(int64(c.defaultBitSize))
 }

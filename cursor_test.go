@@ -33,7 +33,7 @@ func testData() (testStruct, []byte) {
 			0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			2, 'x', 'y',
-			3, 0, 'a', 'b', 'c',
+			3, 'a', 'b', 'c',
 		}
 }
 
@@ -103,12 +103,12 @@ func (t testStruct) Append(c *Cursor) (err error) {
 		return err
 	}
 
-	err = c.WriteBytes(t.bytes, 8)
+	_, err = c.WriteBytes(t.bytes)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteString(t.string, 16)
+	_, err = c.WriteString(t.string)
 	if err != nil {
 		return err
 	}
@@ -167,12 +167,12 @@ func (t *testStruct) Read(c *Cursor) (err error) {
 		return err
 	}
 
-	t.bytes, err = c.ReadBytes(8)
+	t.bytes, err = c.ReadBytes()
 	if err != nil {
 		return err
 	}
 
-	t.string, err = c.ReadString(16)
+	t.string, err = c.ReadString()
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func (t *testStruct) Read(c *Cursor) (err error) {
 	return nil
 }
 
-func TestCursor(t *testing.T) {
+func TestMarshaling(t *testing.T) {
 	s, data := testData()
 
 	t.Run("marshal", func(t *testing.T) {
@@ -194,6 +194,7 @@ func TestCursor(t *testing.T) {
 
 	t.Run("unmarshal", func(t *testing.T) {
 		cur := NewCursor(data)
+
 		require.Equal(t, len(data), cur.Len())
 
 		s2 := testStruct{}
@@ -204,11 +205,13 @@ func TestCursor(t *testing.T) {
 
 	t.Run("marshal-unmarshal", func(t *testing.T) {
 		cur := NewCursor(nil)
+		cur.Reset()
 		err := s.Append(cur)
 		require.NoError(t, err)
 		require.Equal(t, data, cur.Buffer())
 
-		cur.Reset()
+		cur.Move(0)
+		require.Zero(t, cur.Index())
 		s2 := testStruct{}
 		err = s2.Read(cur)
 		require.NoError(t, err)
@@ -216,14 +219,28 @@ func TestCursor(t *testing.T) {
 	})
 }
 
+func TestCursor(t *testing.T) {
+	cursor := NewCursor(make([]byte, 10, 20))
+
+	r := require.New(t)
+	r.Len(cursor.Buffer(), 10)
+	r.Equal(10, cursor.Len())
+	r.Equal(20, cursor.Cap())
+	cursor.LengthBitSize(16)
+	r.Equal(16, cursor.defaultBitSize)
+
+	cursor.SetBuffer(nil)
+	r.Nil(cursor.buf)
+}
+
 func TestInvalidBits(t *testing.T) {
 	t.Run("read", func(t *testing.T) {
-		_, err := NewCursor(make([]byte, 10)).ReadString(7)
+		_, err := NewCursor(make([]byte, 10)).ReadStringBits(7)
 		require.Error(t, err)
 	})
 
 	t.Run("write", func(t *testing.T) {
-		err := NewCursor(nil).WriteString("", 7)
+		err := NewCursor(nil).WriteStringBits("", 7)
 		require.Error(t, err)
 	})
 }

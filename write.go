@@ -58,7 +58,7 @@ func (c *Cursor) WriteFloat64(b float64) error {
 	return c.WriteUint64(math.Float64bits(b))
 }
 
-func (c *Cursor) WriteBytes(s []byte, bits int64) (err error) {
+func (c *Cursor) WriteBytesBits(s []byte, bits int64) (err error) {
 	length := len(s)
 	switch bits {
 	case 8:
@@ -94,8 +94,24 @@ func (c *Cursor) WriteBytes(s []byte, bits int64) (err error) {
 	return nil
 }
 
-func (c *Cursor) WriteString(s string, bits int64) (err error) {
-	return c.WriteBytes(s2b(s), bits)
+func (c *Cursor) WriteStringBits(s string, bits int64) (err error) {
+	return c.WriteBytesBits(s2b(s), bits)
+}
+
+func (c *Cursor) WriteBytes(s []byte) (int, error) {
+	err := c.WriteBytesBits(s, int64(c.defaultBitSize))
+	if err != nil {
+		return 0, err
+	}
+	return len(s), nil
+}
+
+func (c *Cursor) WriteString(s string) (int, error) {
+	err := c.WriteStringBits(s, int64(c.defaultBitSize))
+	if err != nil {
+		return 0, err
+	}
+	return len(s), nil
 }
 
 func (c *Cursor) Append(b []byte) (err error) {
@@ -103,7 +119,6 @@ func (c *Cursor) Append(b []byte) (err error) {
 	c.cursor += copy(c.buf[c.cursor:], b)
 	return nil
 }
-
 
 func (c *Cursor) WriteCursor(cur *Cursor) (err error) {
 	return c.Append(cur.Buffer())
