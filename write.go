@@ -95,6 +95,14 @@ func (c *Cursor) WriteFloat64(b float64) error {
 	return c.WriteUint64(math.Float64bits(b))
 }
 
+func (c *Cursor) WriteBool(b bool) error {
+	if b {
+		return c.WriteInt8(1)
+	} else {
+		return c.WriteInt8(0)
+	}
+}
+
 func (c *Cursor) WriteBytesBits(s []byte, bits int64) (err error) {
 	length := len(s)
 	switch bits {

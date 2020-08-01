@@ -173,6 +173,16 @@ func (c *Cursor) ReadFloat64() (b float64, err error) {
 	return math.Float64frombits(r), nil
 }
 
+func (c *Cursor) ReadBool() (b bool, err error) {
+	var n int8
+	n, err = c.ReadInt8()
+	if err != nil {
+		return false, err
+	}
+
+	return n > 0, nil
+}
+
 func (c *Cursor) ReadBytesBits(bits int64) (s []byte, err error) {
 	length := uint64(0)
 
