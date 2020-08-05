@@ -4,127 +4,87 @@ import (
 	"encoding/binary"
 	"testing"
 
+	"github.com/tdakkota/cursor/testutil"
+
 	"github.com/stretchr/testify/require"
 )
 
-func testData() (testStruct, []byte) {
-	return testStruct{
-			10,
-			1,
-			2,
-			3,
-			4,
-			11,
-			5,
-			6,
-			7,
-			8,
-			0,
-			0,
-			[]byte{'x', 'y'},
-			"abc",
-		}, []byte{
-			10, 0, 0, 0, 0, 0, 0, 0,
-			1,
-			2, 0,
-			3, 0, 0, 0,
-			4, 0, 0, 0, 0, 0, 0, 0,
-			11, 0, 0, 0, 0, 0, 0, 0,
-			5,
-			6, 0,
-			7, 0, 0, 0,
-			8, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			2, 'x', 'y',
-			3, 'a', 'b', 'c',
-		}
+func testData() (testutil.TestStruct, []byte) {
+	return testutil.Data()
 }
 
-type testStruct struct {
-	uint
-	byte
-	uint16
-	uint32
-	uint64
-	int
-	int8
-	int16
-	int32
-	int64
-	float32
-	float64
-	bytes []byte
-	string
-}
-
-func (t testStruct) Append(c *Cursor) (err error) {
-	err = c.WriteUint(t.uint)
+func Append(t testutil.TestStruct, c *Cursor) (err error) {
+	err = c.WriteUint(t.Uint)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteByte(t.byte)
+	err = c.WriteByte(t.Byte)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteUint16(t.uint16)
+	err = c.WriteUint16(t.Uint16)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteUint32(t.uint32)
+	err = c.WriteUint32(t.Uint32)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteUint64(t.uint64)
+	err = c.WriteUint64(t.Uint64)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteInt(t.int)
+	err = c.WriteInt(t.Int)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteInt8(t.int8)
+	err = c.WriteInt8(t.Int8)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteInt16(t.int16)
+	err = c.WriteInt16(t.Int16)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteInt32(t.int32)
+	err = c.WriteInt32(t.Int32)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteInt64(t.int64)
+	err = c.WriteInt64(t.Int64)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteFloat32(t.float32)
+	err = c.WriteFloat32(t.Float32)
 	if err != nil {
 		return err
 	}
 
-	err = c.WriteFloat64(t.float64)
+	err = c.WriteFloat64(t.Float64)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.WriteBytes(t.bytes)
+	_, err = c.WriteBytes(t.Bytes)
 	if err != nil {
 		return err
 	}
 
-	_, err = c.WriteString(t.string)
+	_, err = c.WriteString(t.String)
+	if err != nil {
+		return err
+	}
+
+	err = c.WriteBool(t.Bool)
 	if err != nil {
 		return err
 	}
@@ -132,73 +92,78 @@ func (t testStruct) Append(c *Cursor) (err error) {
 	return nil
 }
 
-func (t *testStruct) Read(c *Cursor) (err error) {
-	t.uint, err = c.ReadUint()
+func Scan(t *testutil.TestStruct, c *Cursor) (err error) {
+	t.Uint, err = c.ReadUint()
 	if err != nil {
 		return err
 	}
 
-	t.byte, err = c.ReadByte()
+	t.Byte, err = c.ReadByte()
 	if err != nil {
 		return err
 	}
 
-	t.uint16, err = c.ReadUint16()
+	t.Uint16, err = c.ReadUint16()
 	if err != nil {
 		return err
 	}
 
-	t.uint32, err = c.ReadUint32()
+	t.Uint32, err = c.ReadUint32()
 	if err != nil {
 		return err
 	}
 
-	t.uint64, err = c.ReadUint64()
+	t.Uint64, err = c.ReadUint64()
 	if err != nil {
 		return err
 	}
 
-	t.int, err = c.ReadInt()
+	t.Int, err = c.ReadInt()
 	if err != nil {
 		return err
 	}
 
-	t.int8, err = c.ReadInt8()
+	t.Int8, err = c.ReadInt8()
 	if err != nil {
 		return err
 	}
 
-	t.int16, err = c.ReadInt16()
+	t.Int16, err = c.ReadInt16()
 	if err != nil {
 		return err
 	}
 
-	t.int32, err = c.ReadInt32()
+	t.Int32, err = c.ReadInt32()
 	if err != nil {
 		return err
 	}
 
-	t.int64, err = c.ReadInt64()
+	t.Int64, err = c.ReadInt64()
 	if err != nil {
 		return err
 	}
 
-	t.float32, err = c.ReadFloat32()
+	t.Float32, err = c.ReadFloat32()
 	if err != nil {
 		return err
 	}
 
-	t.float64, err = c.ReadFloat64()
+	t.Float64, err = c.ReadFloat64()
 	if err != nil {
 		return err
 	}
 
-	t.bytes, err = c.ReadBytes()
+	t.Bytes, err = c.ReadBytes()
 	if err != nil {
 		return err
 	}
 
-	t.string, err = c.ReadString()
+	t.String, err = c.ReadString()
+	if err != nil {
+		return err
+	}
+
+	t.Bool, err = c.ReadBool()
 	if err != nil {
 		return err
 	}
@@ -213,7 +178,7 @@ func TestMarshaling(t *testing.T) {
 		cur := NewCursor(nil)
 		cur.Order(binary.LittleEndian)
 
-		err := s.Append(cur)
+		err := Append(s, cur)
 		require.NoError(t, err)
 		require.Equal(t, data, cur.Buffer())
 	})
@@ -223,8 +188,8 @@ func TestMarshaling(t *testing.T) {
 
 		require.Equal(t, len(data), cur.Len())
 
-		s2 := testStruct{}
-		err := s2.Read(cur)
+		s2 := testutil.TestStruct{}
+		err := Scan(&s2, cur)
 		require.NoError(t, err)
 		require.Equal(t, s, s2)
 	})
@@ -232,14 +197,14 @@ func TestMarshaling(t *testing.T) {
 	t.Run("marshal-unmarshal", func(t *testing.T) {
 		cur := NewCursor(nil)
 		cur.Reset()
-		err := s.Append(cur)
+		err := Append(s, cur)
 		require.NoError(t, err)
 		require.Equal(t, data, cur.Buffer())
 
 		cur.Move(0)
 		require.Zero(t, cur.Index())
-		s2 := testStruct{}
-		err = s2.Read(cur)
+		s2 := testutil.TestStruct{}
+		err = Scan(&s2, cur)
 		require.NoError(t, err)
 		require.Equal(t, s, s2)
 	})
