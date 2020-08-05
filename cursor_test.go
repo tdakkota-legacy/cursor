@@ -23,6 +23,7 @@ func testData() (testStruct, []byte) {
 			0,
 			[]byte{'x', 'y'},
 			"abc",
+			true,
 		}, []byte{
 			10, 0, 0, 0, 0, 0, 0, 0,
 			1,
@@ -38,6 +39,7 @@ func testData() (testStruct, []byte) {
 			0, 0, 0, 0, 0, 0, 0, 0,
 			2, 'x', 'y',
 			3, 'a', 'b', 'c',
+			1,
 		}
 }
 
@@ -56,6 +58,7 @@ type testStruct struct {
 	float64
 	bytes []byte
 	string
+	bool
 }
 
 func (t testStruct) Append(c *Cursor) (err error) {
@@ -125,6 +128,11 @@ func (t testStruct) Append(c *Cursor) (err error) {
 	}
 
 	_, err = c.WriteString(t.string)
+	if err != nil {
+		return err
+	}
+
+	err = c.WriteBool(t.bool)
 	if err != nil {
 		return err
 	}
@@ -199,6 +207,11 @@ func (t *testStruct) Read(c *Cursor) (err error) {
 	}
 
 	t.string, err = c.ReadString()
+	if err != nil {
+		return err
+	}
+
+	t.bool, err = c.ReadBool()
 	if err != nil {
 		return err
 	}
