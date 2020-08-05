@@ -1,9 +1,11 @@
 package errcursor
 
 import (
+	"github.com/tdakkota/cursor/testutil"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/tdakkota/cursor"
-	"testing"
 )
 
 func create(buf []byte) (cur *cursor.Cursor, errcur *Cursor) {
@@ -20,78 +22,83 @@ func TestNewCursor(t *testing.T) {
 	require.Nil(t, errcur.Error())
 }
 
-func TestRead(t *testing.T) {
-	t.Run("error", func(t *testing.T) {
-		_, errcur := create(nil) // empty buffer
-
-		b := errcur.ReadBool() // buffer is too small, errcur.Error() is not nil
-		require.False(t, b)    // zero value is false
-		require.Error(t, errcur.Error())
-
-		// should nothing do here
-		errcur.ReadUint()
-		errcur.ReadByte()
-		errcur.ReadUint8()
-		errcur.ReadUint16()
-		errcur.ReadUint32()
-		errcur.ReadUint64()
-		errcur.ReadInt()
-		errcur.ReadInt8()
-		errcur.ReadInt16()
-		errcur.ReadInt32()
-		errcur.ReadInt64()
-		errcur.ReadFloat32()
-		errcur.ReadFloat64()
-		errcur.ReadBool()
-		errcur.ReadBytesBits(8)
-		errcur.ReadStringBits(8)
-		errcur.ReadBytes()
-		errcur.ReadString()
-	})
-
-	t.Run("no-error", func(t *testing.T) {
-		_, errcur := create([]byte{1})
-
-		b := errcur.ReadBool()
-		require.True(t, b)
-		require.NoError(t, errcur.Error())
-	})
+func testData() (testutil.TestStruct, []byte) {
+	return testutil.Data()
 }
 
-func TestWrite(t *testing.T) {
-	t.Run("error", func(t *testing.T) {
-		_, errcur := create(nil) // empty buffer
+func Append(t testutil.TestStruct, c *Cursor) (err error) {
+	c.WriteUint(t.Uint)
+	c.WriteByte(t.Byte)
+	c.WriteUint16(t.Uint16)
+	c.WriteUint32(t.Uint32)
+	c.WriteUint64(t.Uint64)
+	c.WriteInt(t.Int)
+	c.WriteInt8(t.Int8)
+	c.WriteInt16(t.Int16)
+	c.WriteInt32(t.Int32)
+	c.WriteInt64(t.Int64)
+	c.WriteFloat32(t.Float32)
+	c.WriteFloat64(t.Float64)
+	_ = c.WriteBytes(t.Bytes)
+	_ = c.WriteString(t.String)
+	c.WriteBool(t.Bool)
 
-		errcur.WriteStringBits("", 7) // invalid bit size
+	return c.Error()
+}
 
-		// should nothing do here
-		errcur.WriteUint(0)
-		errcur.WriteByte(0)
-		errcur.WriteUint8(0)
-		errcur.WriteUint16(0)
-		errcur.WriteUint32(0)
-		errcur.WriteUint64(0)
-		errcur.WriteInt(0)
-		errcur.WriteInt8(0)
-		errcur.WriteInt16(0)
-		errcur.WriteInt32(0)
-		errcur.WriteInt64(0)
-		errcur.WriteFloat32(0)
-		errcur.WriteFloat64(0)
-		errcur.WriteBool(false)
-		errcur.WriteBytesBits([]byte{}, 8)
-		errcur.WriteStringBits("", 8)
-		errcur.WriteBytes([]byte{})
-		errcur.WriteString("")
+func Scan(t *testutil.TestStruct, c *Cursor) (err error) {
+	t.Uint = c.ReadUint()
+	t.Byte = c.ReadByte()
+	t.Uint16 = c.ReadUint16()
+	t.Uint32 = c.ReadUint32()
+	t.Uint64 = c.ReadUint64()
+	t.Int = c.ReadInt()
+	t.Int8 = c.ReadInt8()
+	t.Int16 = c.ReadInt16()
+	t.Int32 = c.ReadInt32()
+	t.Int64 = c.ReadInt64()
+	t.Float32 = c.ReadFloat32()
+	t.Float64 = c.ReadFloat64()
+	t.Bytes = c.ReadBytes()
+	t.String = c.ReadString()
+	t.Bool = c.ReadBool()
 
-		require.Error(t, errcur.Error())
+	return c.Error()
+}
+
+func TestMarshaling(t *testing.T) {
+	s, data := testData()
+
+	t.Run("marshal", func(t *testing.T) {
+		cur := NewCursor(cursor.NewCursor(nil))
+
+		err := Append(s, cur)
+		require.NoError(t, err)
+		require.Equal(t, data, cur.Cursor().Buffer())
 	})
 
-	t.Run("no-error", func(t *testing.T) {
-		_, errcur := create([]byte{1})
+	t.Run("unmarshal", func(t *testing.T) {
+		cur := NewCursor(cursor.NewCursor(data))
 
-		b := errcur.ReadBool()
-		require.True(t, b)
-		require.NoError(t, errcur.Error())
+		require.Equal(t, len(data), cur.Cursor().Len())
+
+		s2 := testutil.TestStruct{}
+		err := Scan(&s2, cur)
+		require.NoError(t, err)
+		require.Equal(t, s, s2)
+	})
+
+	t.Run("marshal-unmarshal", func(t *testing.T) {
+		cur := NewCursor(cursor.NewCursor(nil))
+		err := Append(s, cur)
+		require.NoError(t, err)
+		require.Equal(t, data, cur.Cursor().Buffer())
+
+		cur.Cursor().Move(0)
+		require.Zero(t, cur.Cursor().Index())
+		s2 := testutil.TestStruct{}
+		err = Scan(&s2, cur)
+		require.NoError(t, err)
+		require.Equal(t, s, s2)
 	})
 }
