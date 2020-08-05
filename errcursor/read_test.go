@@ -14,7 +14,7 @@ func TestRead(t *testing.T) {
 		require.False(t, b)    // zero value is false
 		require.Error(t, errcur.Error())
 
-		// should nothing do here
+		// should do nothing
 		errcur.ReadUint()
 		errcur.ReadByte()
 		errcur.ReadUint8()

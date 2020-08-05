@@ -1,8 +1,9 @@
 package errcursor
 
 import (
-	"github.com/tdakkota/cursor/testutil"
 	"testing"
+
+	"github.com/tdakkota/cursor/testutil"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tdakkota/cursor"

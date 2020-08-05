@@ -10,9 +10,9 @@ func TestWrite(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		_, errcur := create(nil) // empty buffer
 
-		errcur.WriteStringBits("", 7) // invalid bit size
+		errcur.WriteStringBits("", 7) // invalid bit size, errcur.Error() is not nil
 
-		// should nothing do here
+		// should do nothing
 		errcur.WriteUint(0)
 		errcur.WriteByte(0)
 		errcur.WriteUint8(0)
