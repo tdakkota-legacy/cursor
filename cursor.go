@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 )
 
+// Cursor is a byte-slice cursor.
 type Cursor struct {
 	cursor int
 	buf    []byte
@@ -12,6 +13,7 @@ type Cursor struct {
 	order          binary.ByteOrder
 }
 
+// NewCursor creates new Cursor.
 func NewCursor(buf []byte) *Cursor {
 	return &Cursor{buf: buf, order: binary.LittleEndian, defaultBitSize: 8}
 }
@@ -37,10 +39,13 @@ func (c *Cursor) Reset() {
 	c.cursor = 0
 }
 
+// Move sets cursor position.
+// Warning: user should reallocate buffer manually.
 func (c *Cursor) Move(index int) {
 	c.cursor = index
 }
 
+// Index returns current position of cursor.
 func (c *Cursor) Index() int {
 	return c.cursor
 }
@@ -55,10 +60,12 @@ func (c *Cursor) Cap() int {
 	return cap(c.buf)
 }
 
+// Buffer returns current buffer.
 func (c *Cursor) Buffer() []byte {
 	return c.buf
 }
 
+// SetBuffer sets current buffer.
 func (c *Cursor) SetBuffer(buf []byte) {
 	c.buf = buf
 }
