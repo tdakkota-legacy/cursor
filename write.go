@@ -5,6 +5,7 @@ import (
 	"unsafe"
 )
 
+// WriteUint writes given uint to buffer.
 func (c *Cursor) WriteUint(b uint) error {
 	switch unsafe.Sizeof(uint(0)) {
 	case 1:
@@ -20,10 +21,12 @@ func (c *Cursor) WriteUint(b uint) error {
 	return ErrUnknownIntSize
 }
 
+// WriteByte writes given byte to buffer.
 func (c *Cursor) WriteByte(b byte) error {
 	return c.WriteUint8(b)
 }
 
+// WriteUint8 writes given uint8 to buffer.
 func (c *Cursor) WriteUint8(b uint8) error {
 	c.need(1)
 
@@ -32,6 +35,7 @@ func (c *Cursor) WriteUint8(b uint8) error {
 	return nil
 }
 
+// WriteUint16 writes given uint16 to buffer.
 func (c *Cursor) WriteUint16(b uint16) error {
 	c.need(2)
 
@@ -40,6 +44,7 @@ func (c *Cursor) WriteUint16(b uint16) error {
 	return nil
 }
 
+// WriteUint32 writes given uint32 to buffer.
 func (c *Cursor) WriteUint32(b uint32) error {
 	c.need(4)
 
@@ -48,6 +53,7 @@ func (c *Cursor) WriteUint32(b uint32) error {
 	return nil
 }
 
+// WriteUint64 writes given uint64 to buffer.
 func (c *Cursor) WriteUint64(b uint64) error {
 	c.need(8)
 
@@ -56,6 +62,7 @@ func (c *Cursor) WriteUint64(b uint64) error {
 	return nil
 }
 
+// WriteInt writes given int to buffer.
 func (c *Cursor) WriteInt(b int) error {
 	switch unsafe.Sizeof(int(0)) {
 	case 1:
@@ -71,36 +78,61 @@ func (c *Cursor) WriteInt(b int) error {
 	return ErrUnknownIntSize
 }
 
+// WriteInt8 writes given int8 to buffer.
 func (c *Cursor) WriteInt8(b int8) error {
 	return c.WriteByte(byte(b))
 }
 
+// WriteInt16 writes given int16 to buffer.
 func (c *Cursor) WriteInt16(b int16) error {
 	return c.WriteUint16(uint16(b))
 }
 
+// WriteInt32 writes given int32 to buffer.
 func (c *Cursor) WriteInt32(b int32) error {
 	return c.WriteUint32(uint32(b))
 }
 
+// WriteInt64 writes given int64 to buffer.
 func (c *Cursor) WriteInt64(b int64) error {
 	return c.WriteUint64(uint64(b))
 }
 
+// WriteFloat32 writes given float32 to buffer.
 func (c *Cursor) WriteFloat32(b float32) error {
 	return c.WriteUint32(math.Float32bits(b))
 }
 
+// WriteFloat64 writes given float64 to buffer.
 func (c *Cursor) WriteFloat64(b float64) error {
 	return c.WriteUint64(math.Float64bits(b))
 }
 
+// WriteBool writes given bool to buffer.
 func (c *Cursor) WriteBool(b bool) error {
 	if b {
 		return c.WriteInt8(1)
 	} else {
 		return c.WriteInt8(0)
 	}
+}
+
+// WriteBytes writes given slice and length to buffer.
+func (c *Cursor) WriteBytes(s []byte) (int, error) {
+	err := c.WriteBytesBits(s, int64(c.defaultBitSize))
+	if err != nil {
+		return 0, err
+	}
+	return len(s), nil
+}
+
+// WriteBytes writes given string and length to buffer.
+func (c *Cursor) WriteString(s string) (int, error) {
+	err := c.WriteStringBits(s, int64(c.defaultBitSize))
+	if err != nil {
+		return 0, err
+	}
+	return len(s), nil
 }
 
 func (c *Cursor) WriteBytesBits(s []byte, bits int64) (err error) {
@@ -141,22 +173,6 @@ func (c *Cursor) WriteBytesBits(s []byte, bits int64) (err error) {
 
 func (c *Cursor) WriteStringBits(s string, bits int64) (err error) {
 	return c.WriteBytesBits(s2b(s), bits)
-}
-
-func (c *Cursor) WriteBytes(s []byte) (int, error) {
-	err := c.WriteBytesBits(s, int64(c.defaultBitSize))
-	if err != nil {
-		return 0, err
-	}
-	return len(s), nil
-}
-
-func (c *Cursor) WriteString(s string) (int, error) {
-	err := c.WriteStringBits(s, int64(c.defaultBitSize))
-	if err != nil {
-		return 0, err
-	}
-	return len(s), nil
 }
 
 func (c *Cursor) Append(b []byte) (err error) {
