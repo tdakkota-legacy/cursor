@@ -1,3 +1,5 @@
+// +build !appengine,!unsafe
+
 package cursor
 
 import (
